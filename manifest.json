@@ -12,6 +12,6 @@
   "start_url": "./index.html",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "display": "fullscreen",
+  "display": "minimal-ui",
   "orientation": "portrait"
 }
