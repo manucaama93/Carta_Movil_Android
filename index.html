@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>TV</title>
+
+  <link rel="apple-touch-icon" href="icon.png?v=2">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    #img-fondo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: fill;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #carta {
+      position: absolute;
+      width: 430px;
+      height: auto;
+      will-change: transform, opacity;
+      transform: translate3d(0,0,0) rotate(0deg);
+      opacity: 1;
+      transition: opacity 0.1s ease-out;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      pointer-events: auto;
+      display: none;
+      z-index: 10;
+    }
+
+    /* ZONA SECRETA DE DOBLE TOQUE (Ampliada a 110px de alto) */
+    #zona-secreta {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 110px;
+      z-index: 10000;
+      background: transparent;
+      touch-action: none;
+    }
+
+    /* MENÚ DE SELECCIÓN INICIAL Y CONFIGURACIÓN */
+    #capa-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      color: #fff;
+    }
+
+    #capa-menu h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-baraja {
+      width: 220px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-baraja:active {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+
+  <img id="img-fondo" src="fondo.png?v=2" alt="Fondo">
+
+  <div id="zona-secreta"></div>
+
+  <div id="capa-menu">
+    <h2>Selecciona el Dorso</h2>
+    <div class="btn-baraja" data-imagen="bicycle-roja.png" data-filter="contrast(112%) saturate(85%) brightness(82%)" data-rotate="11deg">Bicycle (Roja)</div>
+    <div class="btn-baraja" data-imagen="bicycle-azul.png" data-filter="contrast(100%) saturate(100%) brightness(100%)" data-rotate="0deg">Bicycle (Azul)</div>
+    <div class="btn-baraja" data-imagen="tallyho-roja.png" data-filter="contrast(100%) saturate(100%) brightness(100%)" data-rotate="11deg">Tally-Ho (Roja)</div>
+    <div class="btn-baraja" data-imagen="tallyho-azul.png" data-filter="contrast(100%) saturate(100%) brightness(100%)" data-rotate="11deg">Tally-Ho (Azul)</div>
+  </div>
+
+  <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
+
+  <script>
+    const carta = document.getElementById('carta');
+    const capaMenu = document.getElementById('capa-menu');
+    const zonaSecreta = document.getElementById('zona-secreta');
+    const botones = document.querySelectorAll('.btn-baraja');
+
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let currentX = 0, currentY = 0;
+    let ticking = false;
+    let lastTouchX = 0, lastTouchY = 0;
+    let rotacionActual = '0deg';
+
+    botones.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const nuevaImagen = btn.getAttribute('data-imagen');
+        const nuevoFiltro = btn.getAttribute('data-filter');
+        rotacionActual = btn.getAttribute('data-rotate') || '0deg';
+
+        carta.src = nuevaImagen;
+        carta.style.filter = nuevoFiltro;
+
+        currentX = 0;
+        currentY = 0;
+        startX = 0;
+        startY = 0;
+        carta.style.transform = `translate3d(0px, 0px, 0) rotate(${rotacionActual})`;
+
+        carta.style.display = 'block';
+        carta.style.opacity = '1';
+        capaMenu.style.display = 'none';
+      });
+    });
+
+    let ultimoToqueArriba = 0;
+
+    // Detección optimizada de doble toque
+    zonaSecreta.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const ahora = Date.now();
+      const diferencia = ahora - ultimoToqueArriba;
+
+      if (diferencia < 550 && diferencia > 30) {
+        capaMenu.style.display = 'flex';
+        carta.style.display = 'none';
+        isDragging = false;
+        ultimoToqueArriba = 0;
+      } else {
+        ultimoToqueArriba = ahora;
+      }
+    }, { passive: false });
+
+    function ocultarCarta() {
+      carta.style.transition = 'opacity 0.1s ease-out';
+      carta.style.opacity = '0';
+      
+      setTimeout(() => {
+        if (carta.style.opacity === '0') {
+          carta.style.display = 'none';
+        }
+      }, 100);
+
+      isDragging = false;
+    }
+
+    window.addEventListener('touchstart', (e) => {
+      if (capaMenu.style.display !== 'none' || e.target === zonaSecreta) return;
+
+      const touch = e.touches[0];
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+
+      carta.style.display = 'block';
+      carta.style.opacity = '1';
+      carta.style.transition = 'none';
+
+      isDragging = true;
+      startX = touch.clientX - currentX;
+      startY = touch.clientY - currentY;
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+
+      currentX = touch.clientX - startX;
+      currentY = touch.clientY - startY;
+
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          carta.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${rotacionActual})`;
+          
+          const screenWidth = window.innerWidth;
+          const screenHeight = window.innerHeight;
+          const sensibilidad = 60;
+
+          if (
+            lastTouchX <= sensibilidad || 
+            lastTouchX >= screenWidth - sensibilidad || 
+            lastTouchY <= sensibilidad || 
+            lastTouchY >= screenHeight - sensibilidad
+          ) {
+            ocultarCarta();
+          }
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      if (!isDragging) return;
+
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const sensibilidad = 60;
+
+      if (
+        lastTouchX <= sensibilidad || 
+        lastTouchX >= screenWidth - sensibilidad || 
+        lastTouchY <= sensibilidad || 
+        lastTouchY >= screenHeight - sensibilidad
+      ) {
+        ocultarCarta();
+      }
+
+      isDragging = false;
+    });
+  </script>
+</body>
+</html>
