@@ -27,12 +27,12 @@
     html, body {
       width: 100%;
       height: 100%;
-      height: 100dvh; /* Altura dinámica para pantallas alargadas */
+      height: 100dvh;
       margin: 0;
       padding: 0;
       overflow: hidden;
       background-color: #000;
-      position: fixed; /* Evita desplazamientos elásticos en Android/iOS */
+      position: fixed;
     }
 
     #img-fondo {
@@ -61,7 +61,7 @@
       z-index: 10;
     }
 
-    /* ZONA SECRETA DE DOBLE TOQUE */
+    /* ZONA SECRETA DE DOBLE TOQUE (110px de alto) */
     #zona-secreta {
       position: fixed;
       top: 0;
@@ -136,12 +136,22 @@
   <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
 
   <script>
+    // Solicitar pantalla completa nativa en el primer toque del usuario
+    document.addEventListener('touchstart', function solicitarPantallaCompleta() {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      }
+      document.removeEventListener('touchstart', solicitarPantallaCompleta);
+    }, { once: true });
+
     // Registro del Service Worker para PWA y soporte offline
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW registrado con éxito', reg))
-          .catch(err => console.log('Error registrando SW', err));
+          .then(reg => console.log('SW instalado con éxito', reg))
+          .catch(err => console.log('Error instalando SW', err));
       });
     }
 
@@ -181,7 +191,7 @@
 
     let ultimoToqueArriba = 0;
 
-    // Detección optimizada de doble toque
+    // Detección de doble toque en la zona superior
     zonaSecreta.addEventListener('touchstart', (e) => {
       e.preventDefault();
       e.stopPropagation();
