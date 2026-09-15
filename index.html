@@ -3,10 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- Configuración PWA e iOS/Android -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  
   <title>TV</title>
 
+  <!-- Iconos y Manifiesto PWA -->
+  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png?v=2">
 
   <style>
@@ -19,11 +26,13 @@
 
     html, body {
       width: 100%;
-      height: 100vh;
+      height: 100%;
+      height: 100dvh; /* Altura dinámica para pantallas alargadas */
       margin: 0;
       padding: 0;
       overflow: hidden;
       background-color: #000;
+      position: fixed; /* Evita desplazamientos elásticos en Android/iOS */
     }
 
     #img-fondo {
@@ -31,7 +40,7 @@
       top: 0;
       left: 0;
       width: 100vw;
-      height: 100vh;
+      height: 100dvh;
       object-fit: fill;
       z-index: 1;
       pointer-events: none;
@@ -52,7 +61,7 @@
       z-index: 10;
     }
 
-    /* ZONA SECRETA DE DOBLE TOQUE (Ampliada a 110px de alto) */
+    /* ZONA SECRETA DE DOBLE TOQUE */
     #zona-secreta {
       position: fixed;
       top: 0;
@@ -127,6 +136,15 @@
   <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
 
   <script>
+    // Registro del Service Worker para PWA y soporte offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW registrado con éxito', reg))
+          .catch(err => console.log('Error registrando SW', err));
+      });
+    }
+
     const carta = document.getElementById('carta');
     const capaMenu = document.getElementById('capa-menu');
     const zonaSecreta = document.getElementById('zona-secreta');
