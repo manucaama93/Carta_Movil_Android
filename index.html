@@ -2,19 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
-  <!-- Configuración para barra de estado transparente y pantalla completa -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#000000">
-  <meta name="mobile-web-app-capable" content="yes">
   
   <title>TV</title>
 
   <!-- Iconos y Manifiesto PWA -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="fondo.png?v=2">
+  <link rel="apple-touch-icon" href="fondo.png?v=4">
 
   <style>
     * {
@@ -27,7 +22,6 @@
     html, body {
       width: 100vw;
       height: 100vh;
-      height: 100dvh;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -45,7 +39,6 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      height: 100dvh;
       object-fit: cover;
       object-position: center;
       z-index: 1;
@@ -67,7 +60,7 @@
       z-index: 10;
     }
 
-    /* ZONA SECRETA DE DOBLE TOQUE (110px de alto) */
+    /* ZONA SECRETA DE DOBLE TOQUE */
     #zona-secreta {
       position: fixed;
       top: 0;
@@ -127,7 +120,7 @@
 </head>
 <body>
 
-  <img id="img-fondo" src="fondo.png?v=2" alt="Fondo">
+  <img id="img-fondo" src="fondo.png?v=4" alt="Fondo">
 
   <div id="zona-secreta"></div>
 
@@ -142,7 +135,6 @@
   <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
 
   <script>
-    // Registro del Service Worker para PWA y soporte offline
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -187,7 +179,6 @@
 
     let ultimoToqueArriba = 0;
 
-    // Detección de doble toque en la zona superior
     zonaSecreta.addEventListener('touchstart', (e) => {
       e.preventDefault();
       e.stopPropagation();
