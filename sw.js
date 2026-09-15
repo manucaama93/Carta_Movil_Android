@@ -1,4 +1,4 @@
-const CACHE_NAME = 'app-carta-v4';
+const CACHE_NAME = 'app-carta-v5';
 const ASSETS = [
   './',
   './index.html',
