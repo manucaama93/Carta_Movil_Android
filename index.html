@@ -122,15 +122,78 @@
   </div>
 
   <script>
-    // Registro del Service Worker para soporte PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
+    const carta = document.getElementById('carta');
+    const capaMenu = document.getElementById('capa-menu');
+    const zonaSecreta = document.getElementById('zona-secreta');
+
+    let barajaSeleccionada = 'roja';
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let currentX = 0, currentY = 0;
+    let initialX = 0, initialY = 0;
+    let lastTap = 0;
+
     function seleccionarBaraja(color) {
-      const menu = document.getElementById('capa-menu');
-      if (menu) menu.style.display = 'none';
+      barajaSeleccionada = color;
+      carta.src = color === 'roja' ? 'carta_roja.png' : 'carta_azul.png';
+      capaMenu.style.display = 'none';
+      
+      // Posición inicial centrada
+      initialX = (window.innerWidth - 430) / 2;
+      initialY = (window.innerHeight - 300) / 2;
+      currentX = initialX;
+      currentY = initialY;
+      
+      actualizarPosicion(currentX, currentY, 0);
+      carta.style.display = 'block';
     }
+
+    function actualizarPosicion(x, y, rot) {
+      carta.style.transform = `translate3d(${x}px, ${y}px, 0px) rotate(${rot}deg)`;
+    }
+
+    // Interacción táctil (Arrastre)
+    carta.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      const touch = e.touches[0];
+      startX = touch.clientX - currentX;
+      startY = touch.clientY - currentY;
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      currentX = touch.clientX - startX;
+      currentY = touch.clientY - startY;
+      
+      // Ligera rotación natural al arrastrar
+      const deltaX = touch.clientX - (startX + currentX);
+      const rotacion = Math.max(-15, Math.min(15, deltaX * 0.2));
+      
+      actualizarPosicion(currentX, currentY, rotacion);
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      actualizarPosicion(currentX, currentY, 0);
+    });
+
+    // Doble toque en zona secreta superior para reabrir el menú
+    zonaSecreta.addEventListener('touchend', (e) => {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTap;
+      if (tapLength < 300 && tapLength > 0) {
+        capaMenu.style.display = 'flex';
+        e.preventDefault();
+      }
+      lastTap = currentTime;
+    });
   </script>
 </body>
 </html>
