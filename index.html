@@ -2,14 +2,18 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
   
   <title>TV</title>
 
   <!-- Iconos y Manifiesto PWA -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="fondo.png?v=4">
+  <link rel="apple-touch-icon" href="fondo.png?v=2">
 
   <style>
     * {
@@ -22,6 +26,7 @@
     html, body {
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -39,6 +44,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       object-fit: cover;
       object-position: center;
       z-index: 1;
@@ -60,7 +66,7 @@
       z-index: 10;
     }
 
-    /* ZONA SECRETA DE DOBLE TOQUE */
+    /* ZONA SECRETA DE DOBLE TOQUE (110px de alto) */
     #zona-secreta {
       position: fixed;
       top: 0;
@@ -120,7 +126,7 @@
 </head>
 <body>
 
-  <img id="img-fondo" src="fondo.png?v=4" alt="Fondo">
+  <img id="img-fondo" src="fondo.png?v=2" alt="Fondo">
 
   <div id="zona-secreta"></div>
 
