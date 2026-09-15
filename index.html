@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-  <!-- Configuración PWA e iOS/Android -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
@@ -12,7 +11,6 @@
   
   <title>TV</title>
 
-  <!-- Iconos y Manifiesto PWA -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png?v=2">
 
@@ -24,10 +22,14 @@
       -webkit-user-select: none;
     }
 
-    html, body {
+    html {
+      background-color: #000;
+      height: 100%;
+    }
+
+    body {
       width: 100vw;
-      height: 100vh;
-      height: -webkit-fill-available;
+      height: 100dvh;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -35,19 +37,18 @@
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
+      /* Extensión completa a zonas seguras de ColorOS */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     #img-fondo {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100vw;
-      height: 100vh;
-      height: -webkit-fill-available;
-      object-fit: cover;
-      object-position: center;
+      height: 100dvh;
+      object-fit: fill;
       z-index: 1;
       pointer-events: none;
     }
@@ -67,7 +68,6 @@
       z-index: 10;
     }
 
-    /* ZONA SECRETA DE DOBLE TOQUE (110px de alto) */
     #zona-secreta {
       position: fixed;
       top: 0;
@@ -79,7 +79,6 @@
       touch-action: none;
     }
 
-    /* MENÚ DE SELECCIÓN INICIAL Y CONFIGURACIÓN */
     #capa-menu {
       position: fixed;
       top: 0;
@@ -142,17 +141,6 @@
   <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
 
   <script>
-    // Solicitar pantalla completa nativa en el primer toque del usuario
-    document.addEventListener('touchstart', function solicitarPantallaCompleta() {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
-      }
-      document.removeEventListener('touchstart', solicitarPantallaCompleta);
-    }, { once: true });
-
-    // Registro del Service Worker para PWA y soporte offline
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -197,7 +185,6 @@
 
     let ultimoToqueArriba = 0;
 
-    // Detección de doble toque en la zona superior
     zonaSecreta.addEventListener('touchstart', (e) => {
       e.preventDefault();
       e.stopPropagation();
