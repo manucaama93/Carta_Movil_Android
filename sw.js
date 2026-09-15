@@ -1,4 +1,4 @@
-const CACHE_NAME = 'app-carta-v3';
+const CACHE_NAME = 'app-carta-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,6 @@ const ASSETS = [
   './bicycle-azul.png',
   './tallyho-roja.png',
   './tallyho-azul.png',
-  './icon.png?v=2',
   './manifest.json'
 ];
 
