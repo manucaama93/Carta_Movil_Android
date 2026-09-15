@@ -7,7 +7,7 @@
   <!-- Configuración PWA e iOS/Android -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="transparent">
+  <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   
   <title>TV</title>
@@ -31,6 +31,7 @@
       padding: 0;
       overflow: hidden;
       background-color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     #img-fondo {
@@ -44,6 +45,45 @@
       object-fit: fill;
       z-index: 1;
       pointer-events: none;
+    }
+
+    /* WIDGET SIMULADO OPPO COLOROS */
+    #widget-reloj {
+      position: fixed;
+      top: 110px; /* Ajusta este valor si necesitas subirlo o bajarlo un poco en tu pantalla */
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2; /* Por encima del fondo, por debajo del menú/carta */
+      color: #ffffff;
+      pointer-events: none;
+    }
+
+    .widget-info-clima {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: -0.2px;
+      margin-bottom: 2px;
+      opacity: 0.95;
+    }
+
+    .widget-icono-clima {
+      width: 22px;
+      height: 22px;
+      fill: #ffffff;
+    }
+
+    .widget-hora-grande {
+      font-size: 4.8rem;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -1.5px;
     }
 
     #carta {
@@ -123,6 +163,18 @@
 
   <img id="img-fondo" src="fondo.png?v=2" alt="Fondo">
 
+  <!-- WIDGET DE FECHA, CLIMA Y HORA -->
+  <div id="widget-reloj">
+    <div class="widget-info-clima">
+      <span id="widget-fecha">mar, 15 sept</span>
+      <svg class="widget-icono-clima" viewBox="0 0 24 24">
+        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+      </svg>
+      <span id="widget-temp">18°</span>
+    </div>
+    <div class="widget-hora-grande" id="widget-hora">17:38</div>
+  </div>
+
   <div id="zona-secreta"></div>
 
   <div id="capa-menu">
@@ -136,6 +188,29 @@
   <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
 
   <script>
+    // LÓGICA DE ACTUALIZACIÓN DEL WIDGET (RELOJ Y FECHA EN TIEMPO REAL)
+    function actualizarWidgetReloj() {
+      const ahora = new Date();
+      
+      // Formato Hora HH:MM
+      const horas = String(ahora.getHours()).padStart(2, '0');
+      const minutos = String(ahora.getMinutes()).padStart(2, '0');
+      document.getElementById('widget-hora').textContent = `${horas}:${minutos}`;
+
+      // Formato Fecha "mar, 15 sept"
+      const diasSemana = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+      const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic'];
+      
+      const diaNombre = diasSemana[ahora.getDay()];
+      const diaNum = ahora.getDate();
+      const mesNombre = meses[ahora.getMonth()];
+
+      document.getElementById('widget-fecha').textContent = `${diaNombre}, ${diaNum} ${mesNombre}`;
+    }
+
+    actualizarWidgetReloj();
+    setInterval(actualizarWidgetReloj, 1000);
+
     // Solicitar pantalla completa nativa en el primer toque del usuario
     document.addEventListener('touchstart', function solicitarPantallaCompleta() {
       if (document.documentElement.requestFullscreen) {
