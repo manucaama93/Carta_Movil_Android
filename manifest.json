@@ -3,16 +3,10 @@
   "name": "TV",
   "icons": [
     {
-      "src": "icon.png?v=2",
-      "sizes": "192x192",
+      "src": "fondo.png?v=2",
+      "sizes": "192x192 512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon.png?v=2",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "start_url": "./index.html",
