@@ -3,7 +3,7 @@
   "name": "TV",
   "icons": [
     {
-      "src": "fondo.png?v=2",
+      "src": "fondo.png?v=4",
       "sizes": "192x192 512x512",
       "type": "image/png",
       "purpose": "any"
@@ -12,6 +12,6 @@
   "start_url": "./index.html",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "display": "minimal-ui",
+  "display": "browser",
   "orientation": "portrait"
 }
