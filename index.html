@@ -3,18 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
-  <meta name="mobile-web-app-capable" content="yes">
-  
-  <title>TV</title>
-
-  <!-- Iconos y Manifiesto PWA -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="fondo.png?v=2">
-
+  <title>TV</title>
   <style>
     * {
       box-sizing: border-box;
@@ -24,39 +17,31 @@
     }
 
     html, body {
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
+      width: 100%;
+      height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
       background-color: #000;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
     }
 
     #img-fondo {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill; /* Forzar ajuste 1:1 total sin bordes */
-  z-index: 1;
-  pointer-events: none;
-}
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: fill;
+      z-index: 1;
+      pointer-events: none;
+    }
 
     #carta {
       position: absolute;
       width: 430px;
       height: auto;
       will-change: transform, opacity;
-      transform: translate3d(0,0,0) rotate(0deg);
+      transform: translate3d(0, 0, 0) rotate(0deg);
       opacity: 1;
       transition: opacity 0.1s ease-out;
       -webkit-touch-callout: none;
@@ -66,7 +51,7 @@
       z-index: 10;
     }
 
-    /* ZONA SECRETA DE DOBLE TOQUE (110px de alto) */
+    /* ZONA SECRETA DE DOBLE TOQUE */
     #zona-secreta {
       position: fixed;
       top: 0;
@@ -126,163 +111,26 @@
 </head>
 <body>
 
-  <img id="img-fondo" src="fondo.png?v=2" alt="Fondo">
-
+  <img id="img-fondo" src="fondo.png" alt="Fondo">
+  <img id="carta" src="" alt="Carta">
   <div id="zona-secreta"></div>
 
   <div id="capa-menu">
-    <h2>Selecciona el Dorso</h2>
-    <div class="btn-baraja" data-imagen="bicycle-roja.png" data-filter="contrast(112%) saturate(85%) brightness(82%)" data-rotate="11deg">Bicycle (Roja)</div>
-    <div class="btn-baraja" data-imagen="bicycle-azul.png" data-filter="contrast(100%) saturate(100%) brightness(100%)" data-rotate="0deg">Bicycle (Azul)</div>
-    <div class="btn-baraja" data-imagen="tallyho-roja.png" data-filter="contrast(100%) saturate(100%) brightness(100%)" data-rotate="11deg">Tally-Ho (Roja)</div>
-    <div class="btn-baraja" data-imagen="tallyho-azul.png" data-filter="contrast(100%) saturate(100%) brightness(100%)" data-rotate="11deg">Tally-Ho (Azul)</div>
+    <h2>Seleccionar Baraja</h2>
+    <button class="btn-baraja" onclick="seleccionarBaraja('roja')">Baraja Roja</button>
+    <button class="btn-baraja" onclick="seleccionarBaraja('azul')">Baraja Azul</button>
   </div>
 
-  <img id="carta" src="bicycle-roja.png" alt="Carta Doblada">
-
   <script>
+    // Registro del Service Worker para soporte PWA
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW instalado con éxito', reg))
-          .catch(err => console.log('Error instalando SW', err));
-      });
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    const carta = document.getElementById('carta');
-    const capaMenu = document.getElementById('capa-menu');
-    const zonaSecreta = document.getElementById('zona-secreta');
-    const botones = document.querySelectorAll('.btn-baraja');
-
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let currentX = 0, currentY = 0;
-    let ticking = false;
-    let lastTouchX = 0, lastTouchY = 0;
-    let rotacionActual = '0deg';
-
-    botones.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const nuevaImagen = btn.getAttribute('data-imagen');
-        const nuevoFiltro = btn.getAttribute('data-filter');
-        rotacionActual = btn.getAttribute('data-rotate') || '0deg';
-
-        carta.src = nuevaImagen;
-        carta.style.filter = nuevoFiltro;
-
-        currentX = 0;
-        currentY = 0;
-        startX = 0;
-        startY = 0;
-        carta.style.transform = `translate3d(0px, 0px, 0) rotate(${rotacionActual})`;
-
-        carta.style.display = 'block';
-        carta.style.opacity = '1';
-        capaMenu.style.display = 'none';
-      });
-    });
-
-    let ultimoToqueArriba = 0;
-
-    zonaSecreta.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const ahora = Date.now();
-      const diferencia = ahora - ultimoToqueArriba;
-
-      if (diferencia < 550 && diferencia > 30) {
-        capaMenu.style.display = 'flex';
-        carta.style.display = 'none';
-        isDragging = false;
-        ultimoToqueArriba = 0;
-      } else {
-        ultimoToqueArriba = ahora;
-      }
-    }, { passive: false });
-
-    function ocultarCarta() {
-      carta.style.transition = 'opacity 0.1s ease-out';
-      carta.style.opacity = '0';
-      
-      setTimeout(() => {
-        if (carta.style.opacity === '0') {
-          carta.style.display = 'none';
-        }
-      }, 100);
-
-      isDragging = false;
+    function seleccionarBaraja(color) {
+      const menu = document.getElementById('capa-menu');
+      if (menu) menu.style.display = 'none';
     }
-
-    window.addEventListener('touchstart', (e) => {
-      if (capaMenu.style.display !== 'none' || e.target === zonaSecreta) return;
-
-      const touch = e.touches[0];
-      lastTouchX = touch.clientX;
-      lastTouchY = touch.clientY;
-
-      carta.style.display = 'block';
-      carta.style.opacity = '1';
-      carta.style.transition = 'none';
-
-      isDragging = true;
-      startX = touch.clientX - currentX;
-      startY = touch.clientY - currentY;
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      e.preventDefault();
-
-      const touch = e.touches[0];
-      lastTouchX = touch.clientX;
-      lastTouchY = touch.clientY;
-
-      currentX = touch.clientX - startX;
-      currentY = touch.clientY - startY;
-
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          carta.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${rotacionActual})`;
-          
-          const screenWidth = window.innerWidth;
-          const screenHeight = window.innerHeight;
-          const sensibilidad = 60;
-
-          if (
-            lastTouchX <= sensibilidad || 
-            lastTouchX >= screenWidth - sensibilidad || 
-            lastTouchY <= sensibilidad || 
-            lastTouchY >= screenHeight - sensibilidad
-          ) {
-            ocultarCarta();
-          }
-          
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: false });
-
-    window.addEventListener('touchend', () => {
-      if (!isDragging) return;
-
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-      const sensibilidad = 60;
-
-      if (
-        lastTouchX <= sensibilidad || 
-        lastTouchX >= screenWidth - sensibilidad || 
-        lastTouchY <= sensibilidad || 
-        lastTouchY >= screenHeight - sensibilidad
-      ) {
-        ocultarCarta();
-      }
-
-      isDragging = false;
-    });
   </script>
 </body>
 </html>
